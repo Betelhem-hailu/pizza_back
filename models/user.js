@@ -29,9 +29,17 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     restaurantId: { 
       type: DataTypes.UUID, 
-      allowNull: true }
+      allowNull: true, 
+      references: {
+        model: 'Restaurants', // The name of the restaurant table
+        key: 'id',
+      }}
   }, {
     hooks: {
       beforeCreate: async (user) => {

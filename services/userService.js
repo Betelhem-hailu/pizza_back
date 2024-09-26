@@ -1,32 +1,28 @@
-const bcrypt = require('bcryptjs');
-const { User, Role } = require('../models');
+const { User, Role } = require("../models");
+const hashPassword = require("../middleware/hashPassword");
 
-/**
- * Registers a user (SuperAdmin).
- */
-export const registerUser = async (userData, transaction) => {
-  const { name, email, password, restaurantId } = userData;
-  const hashedPassword = await bcrypt.hash(password, 10);
+const registerUser = async (userData, transaction) => {
+  const { name, email, password, phoneNumber, restaurantId } = userData;
+  const hashedPassword = await hashPassword(password);
 
   const user = await User.create(
-    { name, email, password: hashedPassword, restaurantId },
-    { transaction }  // Ensuring this action is part of the transaction
+    { name, email, password: hashedPassword, phoneNumber, restaurantId },
+    { transaction }
   );
   return user;
 };
 
-/**
- * Assigns a role (SuperAdmin) to the user.
- */
-export const assignRoleToUser = async (user, roleId, transaction) => {
+const assignRoleToUser = async (user, roleId, transaction) => {
   await user.addRole(roleId, { transaction });
 };
 
-export const createRoleWithPermissions = async (roleData, permissionIds, transaction) => {
-  // Create the role with the provided name
+const createRoleWithPermissions = async (
+  roleData,
+  permissionIds,
+  transaction
+) => {
   const newRole = await Role.create({ name: roleData.name }, { transaction });
 
-  // Associate selected permissions with the new role
   if (permissionIds && permissionIds.length > 0) {
     await newRole.setPermissions(permissionIds, { transaction });
   }
@@ -34,3 +30,4 @@ export const createRoleWithPermissions = async (roleData, permissionIds, transac
   return newRole;
 };
 
+module.exports = { registerUser, assignRoleToUser, createRoleWithPermissions };

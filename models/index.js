@@ -40,12 +40,4 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-const { User, Role, Permission } = require('./models');
-
-// Create associations
-User.associate(models);
-Role.associate(models);
-Permission.associate(models);
-
-
 module.exports = db;

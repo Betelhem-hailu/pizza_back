@@ -14,7 +14,23 @@ module.exports = (sequelize) => {
     }
   });
 
-  // Associations
+  const UserRoles = sequelize.define('UserRoles', {
+    userId: {
+      type: DataTypes.UUID,
+      references: {
+        model: 'User',
+        key: 'id',
+      },
+    },
+    roleId: {
+      type: DataTypes.UUID,
+      references: {
+        model: 'Role',
+        key: 'id',
+      },
+    },
+  });
+
   Role.associate = (models) => {
     Role.belongsToMany(models.User, {
       through: 'UserRoles',
@@ -32,19 +48,4 @@ module.exports = (sequelize) => {
   return Role;
 };
 
-const UserRoles = sequelize.define('UserRoles', {
-  userId: {
-    type: DataTypes.UUID,
-    references: {
-      model: 'User',
-      key: 'id',
-    },
-  },
-  roleId: {
-    type: DataTypes.UUID,
-    references: {
-      model: 'Role',
-      key: 'id',
-    },
-  },
-});
+
