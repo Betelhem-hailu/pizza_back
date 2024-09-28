@@ -17,17 +17,23 @@ const assignRoleToUser = async (user, roleId, transaction) => {
 };
 
 const createRoleWithPermissions = async (
-  roleData,
+  roleName,
   permissionIds,
   transaction
 ) => {
-  const newRole = await Role.create({ name: roleData.name }, { transaction });
+  console.log(roleName);
+  try {
+    const newRole = await Role.create({ name: roleName }, { transaction });
+    
+    if (permissionIds && permissionIds.length > 0) {
+      await newRole.setPermissions(permissionIds, { transaction });
+    }
 
-  if (permissionIds && permissionIds.length > 0) {
-    await newRole.setPermissions(permissionIds, { transaction });
+    return newRole;
+  } catch (error) {
+    console.error('Error creating role with permissions:', error);
+    throw error; // This might trigger the 500 error
   }
-
-  return newRole;
 };
 
 module.exports = { registerUser, assignRoleToUser, createRoleWithPermissions };

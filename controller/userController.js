@@ -149,7 +149,7 @@ const createRole = async (req, res) => {
 
   try {
     const newRole = await createRoleWithPermissions(
-      { name: roleName },
+      roleName,
       permissionIds,
       transaction
     );
@@ -200,10 +200,42 @@ const login = async (req, res) => {
   }
 };
 
+const getRoles = async (req, res) => {
+  try {
+    console.log("Request received to get roles");
+    const roles = await db.Role.findAll();
+    res.status(200).json(roles);
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    res.status(500).json({ error: "Server error" });
+  }
+}
+
+const getPermissions = async (req, res) => {
+  try {
+    const permissions = await db.Permission.findAll();
+    res.status(200).json(permissions);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+}
+
+const getUsers = async (req, res) => {
+  try {
+    const users = await db.User.findAll();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+}
+
 module.exports = {
   registerSuperAdminWithRestaurant,
   registerAdmin,
   registerCustomer,
   createRole,
   login,
+  getRoles,
+  getPermissions,
+  getUsers
 };
