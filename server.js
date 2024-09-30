@@ -3,6 +3,7 @@ const app = require('./app');
 const db = require('./models'); 
 const userRoute = require("./routes/registerRoutes");
 const menuRoute = require("./routes/menuRoutes");
+const orderRoute = require("./routes/orderRoutes");
 app.use(express.static("uploads"));
 
 const port = process.env.PORT || 8000;
@@ -21,6 +22,7 @@ app.get("/pizza", (req, res) => {
   
 app.use('/pizza',userRoute);
 app.use('/pizza',menuRoute);
+app.use('/pizza',orderRoute);
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });

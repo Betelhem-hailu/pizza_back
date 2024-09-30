@@ -120,7 +120,7 @@ const registerAdmin = async (req, res) => {
     const customer = { name, email, password, phoneNumber, restaurantId };
 
     const newUser = await registerUser(customer, transaction);
-    const role = await db.Role.findOne({ Where: { name: roleName } });
+    const role = await db.Role.findOne({ where: { name: roleName } });
 
     console.log('role',role)
 

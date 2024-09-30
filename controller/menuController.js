@@ -1,9 +1,11 @@
 const { sequelize } = require("../models");
 const db = require("../models");
 const { uploadImage } = require("../services/imageUploadService");
+const { registerMenu, createTopping } = require("../services/menuService");
 
 const createMenu = async (req, res) => {
-  const { name, price, restaurantId, toppings } = req.body; // Assume toppings is an array of topping names
+  const { name, price, toppings } = req.body; // Assume toppings is an array of topping names
+  const restaurantId = req.user.restaurantId;
 
   const image = req.file;
   const transaction = await sequelize.transaction();
@@ -26,7 +28,7 @@ const createMenu = async (req, res) => {
     }
 
     const menu = { name, price, image: imageUrl, restaurantId };
-    const newMenu = await registerMenu(newMenu, transaction);
+    const newMenu = await registerMenu(menu, transaction);
 
     const toppingIds = [];
     for (const toppingName of toppings) {
@@ -34,12 +36,6 @@ const createMenu = async (req, res) => {
       toppingIds.push(topping.id);
     }
 
-    for (const toppingId of toppingIds) {
-      await db.MenuTopping.create(
-        { menuId: newMenu.id, toppingId },
-        { transaction }
-      );
-    }
 
     await transaction.commit();
 

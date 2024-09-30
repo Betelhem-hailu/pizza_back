@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const Topping = sequelize.define('Topping', {
+  const Topping = sequelize.define("Topping", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -11,35 +11,21 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-    }
-  });
-
-  const MenuTopping = sequelize.define('MenuTopping', {
-    menuId: {
-      type: DataTypes.UUID,
-      references: {
-        model: 'Menu',
-        key: 'id',
-      },
-    },
-    toppingId: {
-      type: DataTypes.UUID,
-      references: {
-        model: 'Topping',
-        key: 'id',
-      },
     },
   });
 
   Topping.associate = (models) => {
     Topping.belongsToMany(models.Menu, {
-      through: 'MenuTopping',
-      foreignKey: 'toppingId',
-      otherKey: 'menuId',
+      through: "MenuToppings",
+      foreignKey: "toppingId",
+      otherKey: "menuId",
+    });
+    Topping.belongsToMany(models.OrderItem, {
+      through: "OrderItemToppings",
+      foreignKey: "toppingId",
+      as: "orderItems",
     });
   };
 
   return Topping;
 };
-
-

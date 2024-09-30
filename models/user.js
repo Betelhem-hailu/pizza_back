@@ -1,8 +1,7 @@
-const { DataTypes } = require('sequelize');
-const bcrypt = require('bcrypt');
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const User = sequelize.define('User', {
+  const User = sequelize.define("User", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -33,25 +32,28 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    restaurantId: { 
-      type: DataTypes.UUID, 
-      allowNull: true, 
+    restaurantId: {
+      type: DataTypes.UUID,
+      allowNull: true,
       references: {
-        model: 'Restaurants', // The name of the restaurant table
-        key: 'id',
-      }}
+        model: "Restaurants",
+        key: "id",
+      },
+    },
   });
 
-  // Associations
   User.associate = (models) => {
     User.belongsToMany(models.Role, {
-      through: 'UserRoles',
-      foreignKey: 'userId',
-      otherKey: 'roleId',
+      through: "UserRoles",
+      foreignKey: "userId",
+      otherKey: "roleId",
     });
     User.belongsTo(models.Restaurant, {
-       foreignKey: 'restaurantId' 
-      });
+      foreignKey: "restaurantId",
+    });
+    User.hasMany(models.Order, { 
+      foreignKey: "userId", as: "orders"
+     });
   };
 
   return User;
