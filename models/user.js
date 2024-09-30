@@ -40,12 +40,6 @@ module.exports = (sequelize) => {
         model: 'Restaurants', // The name of the restaurant table
         key: 'id',
       }}
-  }, {
-    hooks: {
-      beforeCreate: async (user) => {
-        user.password = await bcrypt.hash(user.password, 10);
-      }
-    }
   });
 
   // Associations

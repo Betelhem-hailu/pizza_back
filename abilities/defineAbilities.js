@@ -1,35 +1,49 @@
 const { AbilityBuilder, Ability } = require('@casl/ability');
+const db = require('../models');
 
-function defineAbilitiesFor(user) {
+async function defineAbilitiesFor(userParam) {
   const { can, cannot, build } = new AbilityBuilder(Ability);
 
-  if (!user.role) {
-    // Customers can:
-    can('view', 'Pizza'); // View pizza menu
-    can('create', 'Order'); // Place orders
-    can('view', 'Order', { userId: user.id }); // View their own orders
-  } else if (user.role === 'SuperAdmin') {
-    // SuperAdmin has full access
+  const user = await db.User.findOne({
+    where: { id: userParam.userId },
+    include: [{ model: db.Role, include: [db.Permission] }],
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const roles = user.Roles;
+
+  console.log('User Roles:', roles);
+  if (roles.some(role => role.name === 'Super Admin')) {
     can('manage', 'all');
   } else {
-    const rolePermissions = user.roles.flatMap(role => role.permissions.map(perm => perm.name));
-  // Define permissions based on rolePermissions
-  if (rolePermissions.includes('See Orders')) {
-    can('view', 'Order'); // Example: can view orders
+    roles.forEach(role => {
+      role.Permissions.forEach(permission => {
+        switch (permission.name) {
+          case 'update Order Status':
+            can('update', 'Order');
+            break;
+          case 'see Orders':
+            can('read', 'Order');
+            break;
+          case 'add Users':
+            can('create', 'User');
+            break;
+          case 'see Customers':
+            can('read', 'Customer');
+            break;
+          case 'create Roles':
+            can('create', 'Role');
+            break;
+          default:
+            break;
+        }
+      });
+    });
   }
-  if (rolePermissions.includes('Update Order Status')) {
-    can('update', 'Order'); // Example: can update order status
-  }
-  if (rolePermissions.includes('See Customers')) {
-    can('view', 'Customer'); // Example: can view customer info
-  }
-  if (rolePermissions.includes('Add Users')) {
-    can('create', 'User'); // Example: can add users
-  }
-  if (rolePermissions.includes('Create Roles')) {
-    can('create', 'Role'); // Example: can create roles
-  }
-  }
+
   return build();
 }
 

@@ -10,6 +10,7 @@ module.exports = {
         { id: uuidv4(), name: 'add Users', createdAt: new Date(), updatedAt: new Date() },
         { id: uuidv4(), name: 'see Customers', createdAt: new Date(), updatedAt: new Date() },
         { id: uuidv4(), name: 'create Roles', createdAt: new Date(), updatedAt: new Date() },
+        { id: uuidv4(), name: 'create Menu', createdAt: new Date(), updatedAt: new Date() },
       ]);
   },
 

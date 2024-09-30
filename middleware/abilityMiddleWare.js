@@ -1,23 +1,18 @@
-const { defineAbilitiesFor } = require('./abilities');
-const { Permission, Role } = require('../models');
+const { defineAbilitiesFor } = require("../abilities/defineAbilities");
 
-const getUserRolePermissions = async (userId) => {
-  const user = await User.findByPk(userId, {
-    include: {
-      model: Role,
-      include: Permission, // Assuming Role has a many-to-many relationship with Permission
-    },
-  });
-
-  return user;
+const checkPermissions = (action, subject) => {
+  return async (req, res, next) => {
+    try {
+      const ability = await defineAbilitiesFor(req.user);
+      if (ability.can(action, subject)) {
+        return next();
+      } else {
+        return res.status(403).json({ error: 'Access Denied' });
+      }
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  };
 };
 
-export const abilityMiddleware = async (req, res, next) => {
-  const userId = req.user.id; // Assuming you have user ID from JWT or session
-  const user = await getUserRolePermissions(userId);
-  
-  req.ability = defineAbilitiesFor(user); // Set abilities for the user
-  next();
-};
-
-
+module.exports = checkPermissions;

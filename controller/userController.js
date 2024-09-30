@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sequelize } = require("../models");
@@ -47,7 +46,7 @@ const registerSuperAdminWithRestaurant = async (req, res) => {
       transaction
     );
 
-    const role = await db.Role.findOne({ name: "super Admin" });
+    const role = await db.Role.findOne({ name: "Super Admin" });
     if (!role) {
       return res.status(404).json({ error: "Role not found" });
     }
@@ -70,7 +69,7 @@ const registerSuperAdminWithRestaurant = async (req, res) => {
 };
 
 const registerCustomer = async (req, res) => {
-  const { name, email, password, phoneNumber, roleName } = req.body;
+  const { name, email, password, phoneNumber } = req.body;
 
   const customer = { name, email, password, phoneNumber };
   const transaction = await sequelize.transaction();
@@ -95,9 +94,8 @@ const registerCustomer = async (req, res) => {
 
 const registerAdmin = async (req, res) => {
   const { name, email, password, phoneNumber, roleName } = req.body;
-  // const restaurantId = req.user.restaurantId;
-
-  const customer = { name, email, password, phoneNumber };
+  const restaurantId = req.user.restaurantId;
+  console.log(roleName);
   const transaction = await sequelize.transaction();
 
   try {
@@ -115,11 +113,16 @@ const registerAdmin = async (req, res) => {
         .status(400)
         .json({ error: "User with this Phone Number already exists" });
     }
-    // if (!restaurantId) {
-    //   return res.status(400).json({ error: "Restaurant Id is required" });
-    // }
+    if (!restaurantId) {
+      return res.status(400).json({ error: "Restaurant Id is required" });
+    }
+
+    const customer = { name, email, password, phoneNumber, restaurantId };
+
     const newUser = await registerUser(customer, transaction);
     const role = await db.Role.findOne({ Where: { name: roleName } });
+
+    console.log('role',role)
 
     if (!role) {
       return res.status(404).json({ error: "Role not found" });
@@ -169,22 +172,29 @@ const createRole = async (req, res) => {
 };
 
 const login = async (req, res) => {
+
   const { email, password } = req.body;
-
   try {
-    const user = await db.User.findOne({ where: { email } });
+    const user = await db.User.findOne({
+      where: { email },
+      include: [{
+        model: db.Role,
+        through: { attributes: [] },
+        include: [{
+          model: db.Permission,
+          through: { attributes: [] }
+        }]
+      }]
+    });
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
-
-    console.log(user.password)
     const isMatch = bcrypt.compareSync(password, user.password);
-    const validPassword = bcrypt.compareSync(password, user.password);
-    console.log(validPassword);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-    const jwtSecret = crypto.randomBytes(64).toString('hex');
+    const roles = user.Roles.map(role => role.name);
+
     const token = jwt.sign(
-      { userId: user.id, roles: user.roles, restaurantId: user.restaurantId },
-      jwtSecret,
+      { userId: user.id, roles, restaurantId: user.restaurantId },
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
     res.cookie("jwt", token, {
