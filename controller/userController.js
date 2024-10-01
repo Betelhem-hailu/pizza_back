@@ -9,6 +9,7 @@ const {
 } = require("../services/userService");
 const { createRestaurant } = require("../services/restaurantService");
 const { uploadImage } = require("../services/imageUploadService");
+const { Op } = require("sequelize");
 
 const registerSuperAdminWithRestaurant = async (req, res) => {
   const { adminName, email, phoneNumber, password, restaurantName, location } = req.body;
@@ -95,7 +96,6 @@ const registerCustomer = async (req, res) => {
 const registerAdmin = async (req, res) => {
   const { name, email, password, phoneNumber, roleName } = req.body;
   const restaurantId = req.user.restaurantId;
-  console.log(roleName);
   const transaction = await sequelize.transaction();
 
   try {
@@ -122,7 +122,6 @@ const registerAdmin = async (req, res) => {
     const newUser = await registerUser(customer, transaction);
     const role = await db.Role.findOne({ where: { name: roleName } });
 
-    console.log('role',role)
 
     if (!role) {
       return res.status(404).json({ error: "Role not found" });
@@ -211,9 +210,25 @@ const login = async (req, res) => {
 };
 
 const getRoles = async (req, res) => {
+  const { searchTerm } = req.query;
   try {
-    console.log("Request received to get roles");
-    const roles = await db.Role.findAll();
+    const whereClause = {};
+
+   
+    if (searchTerm) {
+      whereClause.name = {
+        [Op.iLike]: `%${searchTerm}%`, 
+      };
+    }
+
+    const roles = await db.Role.findAll({
+      where: whereClause,
+    });
+
+    if (!roles || roles.length === 0) {
+      return res.status(404).json({ message: 'No roles found matching the search criteria.' });
+    }
+
     res.status(200).json(roles);
   } catch (error) {
     console.error('Error fetching roles:', error);
@@ -231,13 +246,40 @@ const getPermissions = async (req, res) => {
 }
 
 const getUsers = async (req, res) => {
+  const { searchTerm, roleName } = req.query;
+
   try {
-    const users = await db.User.findAll();
-    res.status(200).json(users);
+    const whereClause = {};
+    if (searchTerm) {
+      whereClause[Op.or] = [
+        { name: { [Op.iLike]: `%${searchTerm}%` } },
+        { email: { [Op.iLike]: `%${searchTerm}%` } }
+      ];
+    }
+
+    const roleInclude = {
+      model: db.Role,
+      as: 'Roles', 
+      through: { attributes: [] }, 
+      required: !!roleName, 
+      where: roleName ? { name: { [Op.iLike]: `%${roleName}%` } } : null,
+    };
+
+    const users = await db.User.findAll({
+      where: whereClause,
+      include: [roleInclude],
+    });
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "No users found matching the search criteria." });
+    }
+
+    res.status(200).json({ users });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Server error", details: error.message });
   }
-}
+};
 
 module.exports = {
   registerSuperAdminWithRestaurant,

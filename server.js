@@ -1,7 +1,7 @@
 const express = require("express");
 const app = require('./app');
 const db = require('./models'); 
-const userRoute = require("./routes/registerRoutes");
+const userRoute = require("./routes/userRoutes");
 const menuRoute = require("./routes/menuRoutes");
 const orderRoute = require("./routes/orderRoutes");
 app.use(express.static("uploads"));
