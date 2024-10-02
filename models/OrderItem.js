@@ -32,6 +32,7 @@ module.exports = (sequelize) => {
     OrderItem.belongsToMany(models.Topping, {
       through: "OrderItemToppings",
       foreignKey: "orderItemId",
+      otherKey: "toppingId",
       as: "toppings",
     });
   };

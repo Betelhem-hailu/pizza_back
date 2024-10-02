@@ -2,9 +2,9 @@ const db = require("../models");
 const { Op } = require('sequelize');
 
 const createOrder = async (req, res) => {
-  const { menuItems, toppings } = req.body;
+  const { menuItems } = req.body;
   const { userId, restaurantId } = req.user;
-
+  const transaction = await db.sequelize.transaction();
   try {
     let totalPrice = 0;
     const createdOrderItems = [];
@@ -14,10 +14,10 @@ const createOrder = async (req, res) => {
       restaurantId,
       status: "pending",
       totalPrice,
-    });
+    }, { transaction });
 
     for (const menuItem of menuItems) {
-      const { menuId, quantity } = menuItem;
+      const { menuId, quantity, toppings } = menuItem;
       const menu = await db.Menu.findByPk(menuId);
       if (!menu) {
         return res.status(400).json({ error: "Menu not found" });
@@ -38,19 +38,25 @@ const createOrder = async (req, res) => {
         price: orderItemPrice,
       });
 
+      const toppingIds = [];
+      console.log(toppings);
       if (toppings && toppings.length > 0) {
         for (const toppingId of toppings) {
           const topping = await db.Topping.findByPk(toppingId);
-          if (topping) {
-            await orderItem.addTopping(topping);
-          }
+          console.log(topping);
+          toppingIds.push(topping.id);
         }
       }
+
+      // if(toppings){
+        await orderItem.addToppings(toppingIds, { transaction });
+      // }
 
       totalPrice += orderItemPrice;
       createdOrderItems.push(orderItem);
     }
-    await newOrder.update({ totalPrice });
+    await newOrder.update({totalPrice}, {transaction} );
+    await transaction.commit();
 
     return res.status(201).json({
       message: "Order placed successfully",
@@ -138,14 +144,17 @@ const getOrdersByRestaurantId = async (req, res) => {
   const orderItemInclude = {
     model: db.OrderItem,
     as: "orderItems",
+    attributes: ["quantity"],
     include: [
       {
         model: db.Menu,
         as: "pizza",
+        attributes: ["name", "price", "image"], // Get pizza name, price, and image
       },
       {
         model: db.Topping,
         as: "toppings",
+        attributes: ["name"], // Get topping names
       },
     ],
   };
@@ -159,10 +168,33 @@ const getOrdersByRestaurantId = async (req, res) => {
   try {
     const orders = await db.Order.findAll({
       where: whereClause,
-      include: [orderItemInclude],
+      attributes: ["createdAt", "status", "id"], 
+      include: [
+        orderItemInclude,
+        {
+          model: db.User,
+          as: "customer",
+          attributes: ["phoneNumber"], 
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
 
+    const flattenedOrders = orders.map(order => ({
+      orderId: order.id,
+      createdAt: order.createdAt,
+      status: order.status,
+      customerPhoneNumber: order.customer.phoneNumber,
+      orderItems: order.orderItems.map(orderItem => ({
+        orderItemId: orderItem.id,
+        quantity: orderItem.quantity,
+        pizzaName: orderItem.pizza.name,
+        pizzaPrice: orderItem.pizza.price,
+        pizzaImage: orderItem.pizza.image,
+        toppings: orderItem.toppings.map(topping => topping.name).join(", ") || null
+      }))
+    }));
+    
     console.log(orders);
 
     if (!orders || orders.length === 0) {
@@ -171,7 +203,7 @@ const getOrdersByRestaurantId = async (req, res) => {
         .json({ message: "No orders found for this restaurant." });
     }
 
-    return res.status(200).json({ orders });
+    return res.status(200).json({ orders: flattenedOrders });
   } catch (error) {
     console.error("Error getting orders by restaurant id:", error);
     return res

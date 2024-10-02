@@ -35,22 +35,6 @@ module.exports = (sequelize) => {
     },
   });
 
-  const MenuTopping = sequelize.define("MenuTopping", {
-    menuId: {
-      type: DataTypes.UUID,
-      references: {
-        model: "Menu",
-        key: "id",
-      },
-    },
-    toppingId: {
-      type: DataTypes.UUID,
-      references: {
-        model: "Topping",
-        key: "id",
-      },
-    },
-  });
 
   Menu.associate = (models) => {
     Menu.belongsToMany(models.Topping, {
@@ -60,6 +44,7 @@ module.exports = (sequelize) => {
     });
     Menu.belongsTo(models.Restaurant, {
       foreignKey: "restaurantId",
+      as: 'restaurant',
     });
     Menu.hasMany(models.OrderItem, { 
       foreignKey: "menuId", as: "orderItems" 

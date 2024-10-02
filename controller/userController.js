@@ -4,6 +4,7 @@ const { sequelize } = require("../models");
 const db = require("../models");
 const {
   registerUser,
+  registerCustomer,
   assignRoleToUser,
   createRoleWithPermissions,
 } = require("../services/userService");
@@ -69,14 +70,14 @@ const registerSuperAdminWithRestaurant = async (req, res) => {
   }
 };
 
-const registerCustomer = async (req, res) => {
-  const { name, email, password, phoneNumber } = req.body;
+const register = async (req, res) => {
+  const { name, email, password, phoneNumber, location } = req.body;
 
-  const customer = { name, email, password, phoneNumber };
+  const customer = { name, email, password, phoneNumber, location };
   const transaction = await sequelize.transaction();
 
   try {
-    const newUser = await registerUser(customer, transaction);
+    const newUser = await registerCustomer(customer, transaction);
 
     await transaction.commit();
 
@@ -274,7 +275,7 @@ const getUsers = async (req, res) => {
       return res.status(404).json({ message: "No users found matching the search criteria." });
     }
 
-    res.status(200).json({ users });
+    res.status(200).json(users );
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ error: "Server error", details: error.message });
@@ -284,7 +285,7 @@ const getUsers = async (req, res) => {
 module.exports = {
   registerSuperAdminWithRestaurant,
   registerAdmin,
-  registerCustomer,
+  register,
   createRole,
   login,
   getRoles,

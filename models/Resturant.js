@@ -12,5 +12,12 @@ module.exports = (sequelize) => {
     Restaurant.hasMany(models.User, { foreignKey: 'restaurantId' });
   };
 
+  Restaurant.associate = (models) => {
+    Restaurant.hasMany(models.Menu, {
+      foreignKey: 'restaurantId',
+      as: 'pizza', 
+    });
+  };
+
   return Restaurant;
 };

@@ -21,8 +21,9 @@ module.exports = (sequelize) => {
       otherKey: "menuId",
     });
     Topping.belongsToMany(models.OrderItem, {
-      through: "OrderItemToppings",
-      foreignKey: "toppingId",
+      through: "OrderItemToppings", 
+      foreignKey: "toppingId", 
+      otherKey: "orderItemId",
       as: "orderItems",
     });
   };
