@@ -15,7 +15,7 @@ async function defineAbilitiesFor(userParam) {
 
   const roles = user.Roles;
 
-  console.log('User Roles:', roles);
+
   if (roles.some(role => role.name === 'Super Admin')) {
     can('manage', 'all');
   } else {

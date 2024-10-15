@@ -175,7 +175,13 @@ const login = async (req, res) => {
 
   const { email, password } = req.body;
   try {
-    const user = await db.User.findOne({
+    let user;
+    let roles = [];
+
+    const adminEmailPattern = /.+\.admin@gmail\.com$/;
+
+    if (adminEmailPattern.test(email)) {
+     user = await db.User.findOne({
       where: { email },
       include: [{
         model: db.Role,
@@ -186,11 +192,18 @@ const login = async (req, res) => {
         }]
       }]
     });
+
+    if (user && user.Roles) {
+      roles = user.Roles.map(role => role.name);
+    }
+
+  } else {
+    user = await db.Customer.findOne({ where: { email } });
+  }
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
     const isMatch = bcrypt.compareSync(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-    const roles = user.Roles.map(role => role.name);
 
     const token = jwt.sign(
       { userId: user.id, roles, restaurantId: user.restaurantId },
@@ -204,7 +217,14 @@ const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ message: "Logged in successfully" });
+    data = {
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      location: user.location,
+    }
+
+    res.status(200).json({ message: "Logged in successfully", data });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }

@@ -7,7 +7,7 @@ const checkPermissions = require("../middleware/abilityMiddleWare");
 
 router.post("/createMenu", authenticate, checkPermissions('create', 'Menu'), uploadImages.single('image'), createMenu);
 router.get("/toppings", getToppings);
-router.get("/getMenuById/:id",authenticate, getMenuById);
+router.get("/getMenuById/:id", getMenuById);
 router.get("/getAllMenus", getAllMenus);
 router.get("/getPopularMenus", getPopularMenus);
 router.get("/getTopRestaurants", getTopRestaurants);

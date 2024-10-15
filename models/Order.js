@@ -33,8 +33,8 @@ module.exports = (sequelize) => {
   );
 
   Order.associate = (models) => {
-    Order.belongsTo(models.User, {
-      foreignKey: "userId",
+    Order.belongsTo(models.Customer, {
+      foreignKey: "customerId",
       as: "customer",
     });
     Order.belongsTo(models.Restaurant, {

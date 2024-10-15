@@ -4,8 +4,8 @@ const { createOrder, getOrderHistory, updateOrderStatus, getOrdersByRestaurantId
 const authenticate = require('../middleware/authMiddleware');
 const checkPermissions = require('../middleware/abilityMiddleWare');
 
-router.post('/placeorder', authenticate, checkPermissions('create', 'Order'),createOrder);
-router.get('/orderhistory', authenticate, checkPermissions('read', 'Order'), getOrderHistory);
+router.post('/placeorder', authenticate, createOrder);
+router.get('/orderhistory', authenticate, getOrderHistory);
 router.put('/updateorderstatus', authenticate, checkPermissions('update', 'Order'), updateOrderStatus);
-router.get("/getorders", authenticate, getOrdersByRestaurantId);
+router.get("/orders", authenticate, getOrdersByRestaurantId);
 module.exports = router;

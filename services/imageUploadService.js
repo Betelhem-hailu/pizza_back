@@ -7,7 +7,6 @@ cloudinary.config({
 });
 
 const uploadImage = async (file, folder) => {
-  console.log("files" ,file, folder)
   try {
     const result = await cloudinary.uploader.upload(file, {
       folder: folder

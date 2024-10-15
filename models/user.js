@@ -51,9 +51,9 @@ module.exports = (sequelize) => {
     User.belongsTo(models.Restaurant, {
       foreignKey: "restaurantId",
     });
-    User.hasMany(models.Order, { 
-      foreignKey: "userId", as: "orders"
-     });
+    // User.hasMany(models.Order, { 
+    //   foreignKey: "userId", as: "orders"
+    //  });
   };
 
   return User;

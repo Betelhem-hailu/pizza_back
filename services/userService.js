@@ -1,16 +1,15 @@
-const { User, Role } = require("../models");
+const { User, Role, Customer } = require("../models");
 const hashPassword = require("../middleware/hashPassword");
-const UserCust = require("../models/UserCust");
 
 const registerCustomer = async (userData, transaction) => {
   const { name, email, password, phoneNumber, location } = userData;
   const hashedPassword = await hashPassword(password);
 
-  const user = await UserCust.create(
-    { name, email, password: hashedPassword, phoneNumber, restaurantId, location },
+  const customer = await Customer.create(
+    { name, email, password: hashedPassword, phoneNumber, location },
     { transaction }
   );
-  return user;
+  return customer;
 };
 
 const registerUser = async (userData, transaction) => {
@@ -33,7 +32,6 @@ const createRoleWithPermissions = async (
   permissionIds,
   transaction
 ) => {
-  console.log(roleName);
   try {
     const newRole = await Role.create({ name: roleName }, { transaction });
     

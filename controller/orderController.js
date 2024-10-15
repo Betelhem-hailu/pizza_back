@@ -2,15 +2,16 @@ const db = require("../models");
 const { Op } = require('sequelize');
 
 const createOrder = async (req, res) => {
-  const { menuItems } = req.body;
-  const { userId, restaurantId } = req.user;
+  const { menuItems, restaurantId} = req.body;
+  const { userId } = req.user;
   const transaction = await db.sequelize.transaction();
+
   try {
     let totalPrice = 0;
     const createdOrderItems = [];
 
     const newOrder = await db.Order.create({
-      userId,
+      customerId: userId,
       restaurantId,
       status: "pending",
       totalPrice,
@@ -39,11 +40,9 @@ const createOrder = async (req, res) => {
       });
 
       const toppingIds = [];
-      console.log(toppings);
       if (toppings && toppings.length > 0) {
         for (const toppingId of toppings) {
           const topping = await db.Topping.findByPk(toppingId);
-          console.log(topping);
           toppingIds.push(topping.id);
         }
       }
@@ -70,11 +69,11 @@ const createOrder = async (req, res) => {
 };
 
 const getOrderHistory = async (req, res) => {
-  const userId = req.user.userId;
+  const customerId = req.user.userId;
 
   try {
     const orders = await db.Order.findAll({
-      where: { userId },
+      where: { customerId },
       include: [
         {
           model: db.OrderItem,
@@ -93,7 +92,24 @@ const getOrderHistory = async (req, res) => {
       ],
       order: [["createdAt", "DESC"]],
     });
-    return res.status(200).json({ orders });
+    const flattenedOrders = orders.map((order) => {
+
+      return {
+        orderId: order.id,
+        createdAt: order.createdAt,
+        status: order.status,
+        orderItems: order.orderItems.map(orderItem => ({
+          orderItemId: orderItem.id,
+          quantity: orderItem.quantity,
+          pizzaName: orderItem.pizza.name,
+          pizzaPrice: orderItem.price,
+          pizzaImage: orderItem.pizza.image,
+          toppings: orderItem.toppings.map(topping => topping.name).join(", ") || null
+        }))
+      };
+    });
+    
+    return res.status(200).json({ orders: flattenedOrders });
   } catch (error) {
     console.error("Error getting order history:", error);
     return res.status(500).json({ error: "Failed to get order history" });
@@ -102,7 +118,6 @@ const getOrderHistory = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
   const { orderId, status } = req.body;
-
   try {
     const order = await db.Order.findByPk(orderId);
     if (!order) {
@@ -172,7 +187,7 @@ const getOrdersByRestaurantId = async (req, res) => {
       include: [
         orderItemInclude,
         {
-          model: db.User,
+          model: db.Customer,
           as: "customer",
           attributes: ["phoneNumber"], 
         },
@@ -194,8 +209,6 @@ const getOrdersByRestaurantId = async (req, res) => {
         toppings: orderItem.toppings.map(topping => topping.name).join(", ") || null
       }))
     }));
-    
-    console.log(orders);
 
     if (!orders || orders.length === 0) {
       return res

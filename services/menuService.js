@@ -10,14 +10,14 @@ const registerMenu = async (newMenu, transaction) => {
     return menu;
   };
 
-  const createTopping = async (name, transaction) => {
-    let topping = await Topping.findOne({ where: { name } });
+const createTopping = async (name, transaction) => {
+  let topping = await Topping.findOne({ where: { name } });
 
-    if (!topping) {
-        topping = await Topping.create({ name }, { transaction });
-    }
+  if (!topping) {
+      topping = await Topping.create({ name }, { transaction });
+  }
 
-    return topping; 
-};
+  return topping; 
+}
 
 module.exports = {registerMenu, createTopping}

@@ -5,7 +5,8 @@ const { uploadImage } = require("../services/imageUploadService");
 const { registerMenu, createTopping } = require("../services/menuService");
 
 const createMenu = async (req, res) => {
-  const { name, price, toppings } = req.body;
+  const { name, price } = req.body;
+  const toppings = JSON.parse(req.body.toppings);
   const restaurantId = req.user.restaurantId;
 
   const image = req.file;
@@ -103,7 +104,8 @@ const getAllMenus = async (req, res) => {
       include: [
         {
           model: db.Restaurant,
-          attributes: ["name"],
+          attributes: ["name", "logo"],
+          as: "restaurant",
           ...(restaurantName && {
             where: {
               name: {
@@ -199,7 +201,6 @@ const getPopularMenus = async (req, res) => {
       return acc;
     }, []);
 
-    console.log(structuredResults); // This will log the structured result
 
     return res.status(200).json(structuredResults);
   } catch (error) {

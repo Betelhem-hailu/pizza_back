@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const UserCust = sequelize.define("UserCust", {
+  const Customer = sequelize.define("Customer", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -31,14 +31,14 @@ module.exports = (sequelize) => {
     location: {
       type: DataTypes.STRING,
       allowNull: true,
-    }
+    },
   });
 
-  UserCust.associate = (models) => {
-    UserCust.hasMany(models.Order, { 
-      foreignKey: "userId", as: "order"
+  Customer.associate = (models) => {
+    Customer.hasMany(models.Order, { 
+      foreignKey: "customerId", as: "orders"
      });
   };
 
-  return UserCust;
+  return Customer;
 };
