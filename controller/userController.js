@@ -134,7 +134,7 @@ const registerAdmin = async (req, res) => {
 
     res
       .status(201)
-      .json({ message: "Customer registered successfully" });
+      .json({ message: "User registered successfully" });
   } catch (err) {
     if (!transaction.finished) {
       await transaction.rollback();
@@ -147,12 +147,14 @@ const registerAdmin = async (req, res) => {
 
 const createRole = async (req, res) => {
   const { roleName, permissionIds } = req.body;
+  const restaurantId = req.user.restaurantId;
 
   const transaction = await sequelize.transaction();
 
   try {
     const newRole = await createRoleWithPermissions(
       roleName,
+      restaurantId,
       permissionIds,
       transaction
     );
@@ -231,9 +233,12 @@ const login = async (req, res) => {
 };
 
 const getRoles = async (req, res) => {
+  const restaurantId = req.user.restaurantId;
   const { searchTerm } = req.query;
   try {
-    const whereClause = {};
+    const whereClause = {
+      restaurantId,
+    };
 
    
     if (searchTerm) {
@@ -267,10 +272,13 @@ const getPermissions = async (req, res) => {
 }
 
 const getUsers = async (req, res) => {
+  const restaurantId = req.user.restaurantId;
   const { searchTerm, roleName } = req.query;
 
   try {
-    const whereClause = {};
+    const whereClause = {
+      restaurantId
+    };
     if (searchTerm) {
       whereClause[Op.or] = [
         { name: { [Op.iLike]: `%${searchTerm}%` } },

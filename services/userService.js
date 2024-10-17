@@ -29,11 +29,12 @@ const assignRoleToUser = async (user, roleId, transaction) => {
 
 const createRoleWithPermissions = async (
   roleName,
+  restaurantId,
   permissionIds,
   transaction
 ) => {
   try {
-    const newRole = await Role.create({ name: roleName }, { transaction });
+    const newRole = await Role.create({ name: roleName, restaurantId }, { transaction });
     
     if (permissionIds && permissionIds.length > 0) {
       await newRole.setPermissions(permissionIds, { transaction });

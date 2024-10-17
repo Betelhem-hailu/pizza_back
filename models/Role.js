@@ -11,7 +11,15 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-    }
+    },
+    restaurantId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Restaurants",
+        key: "id",
+      },
+    },
   });
 
   const UserRoles = sequelize.define('UserRoles', {
@@ -37,7 +45,9 @@ module.exports = (sequelize) => {
       foreignKey: 'roleId',
       otherKey: 'userId',
     });
-
+    Role.belongsTo(models.Restaurant, {
+      foreignKey: "restaurantId",
+    });
     Role.belongsToMany(models.Permission, {
       through: 'RolePermissions',
       foreignKey: 'roleId',

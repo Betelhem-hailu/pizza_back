@@ -18,6 +18,9 @@ module.exports = (sequelize) => {
       as: 'pizza', 
     });
   };
+  Restaurant.associate = (models) => {
+    Restaurant.hasMany(models.Role, { foreignKey: 'restaurantId' });
+  };
 
   return Restaurant;
 };

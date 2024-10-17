@@ -165,6 +165,7 @@ const getOrdersByRestaurantId = async (req, res) => {
         model: db.Menu,
         as: "pizza",
         attributes: ["name", "price", "image"], // Get pizza name, price, and image
+        where: {},
       },
       {
         model: db.Topping,
@@ -180,6 +181,7 @@ const getOrdersByRestaurantId = async (req, res) => {
     };
   }
 
+  console.log(whereClause);
   try {
     const orders = await db.Order.findAll({
       where: whereClause,
@@ -195,7 +197,9 @@ const getOrdersByRestaurantId = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const flattenedOrders = orders.map(order => ({
+    const flattenedOrders = orders
+    .filter(order => order.orderItems && order.orderItems.length > 0)
+    .map(order => ({
       orderId: order.id,
       createdAt: order.createdAt,
       status: order.status,
@@ -210,10 +214,8 @@ const getOrdersByRestaurantId = async (req, res) => {
       }))
     }));
 
-    if (!orders || orders.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No orders found for this restaurant." });
+    if (!flattenedOrders || flattenedOrders.length === 0) {
+      return res.status(404).json({ message: "No orders found for this restaurant." });
     }
 
     return res.status(200).json({ orders: flattenedOrders });
