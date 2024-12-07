@@ -1,5 +1,5 @@
 'use strict';
-import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+const { Client } = require('pg');
 
 const fs = require('fs');
 const path = require('path');
