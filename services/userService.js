@@ -1,5 +1,7 @@
-const { User, Role, Customer } = require("../models");
-const hashPassword = require("../middleware/hashPassword");
+// const { User, Role, Customer } = require("../models");
+// const hashPassword = require("../middleware/hashPassword");
+import { User, Role, Customer } from '../models';
+import hashPassword from '../middleware/hashPassword';
 
 const registerCustomer = async (userData, transaction) => {
   const { name, email, password, phoneNumber, location } = userData;

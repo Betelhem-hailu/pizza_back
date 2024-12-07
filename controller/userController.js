@@ -1,16 +1,26 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { sequelize } = require("../models");
-const db = require("../models");
-const {
-  registerUser,
-  registerCustomer,
-  assignRoleToUser,
-  createRoleWithPermissions,
-} = require("../services/userService");
-const { createRestaurant } = require("../services/restaurantService");
-const { uploadImage } = require("../services/imageUploadService");
-const { Op } = require("sequelize");
+// const bcrypt = require("bcryptjs");
+// const jwt = require("jsonwebtoken");
+// const { sequelize } = require("../models");
+// const db = require("../models");
+// const {
+//   registerUser,
+//   registerCustomer,
+//   assignRoleToUser,
+//   createRoleWithPermissions,
+// } = require("../services/userService");
+// const { createRestaurant } = require("../services/restaurantService");
+// const { uploadImage } = require("../services/imageUploadService");
+// const { Op } = require("sequelize");
+
+import db from '../models';
+import { Op } from 'sequelize';
+import { registerUser, registerCustomer, assignRoleToUser, createRoleWithPermissions } from '../services/userService';
+import { createRestaurant } from '../services/restaurantService';
+import { uploadImage } from '../services/imageUploadService';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { sequelize } from '../models';
+
 
 const registerSuperAdminWithRestaurant = async (req, res) => {
   const { adminName, email, phoneNumber, password, restaurantName, location } = req.body;

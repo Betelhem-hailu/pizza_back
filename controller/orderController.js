@@ -1,5 +1,7 @@
-const db = require("../models");
-const { Op } = require('sequelize');
+// const db = require("../models");
+// const { Op } = require('sequelize');
+import db from '../models';
+import { Op } from 'sequelize';
 
 const createOrder = async (req, res) => {
   const { menuItems, restaurantId} = req.body;

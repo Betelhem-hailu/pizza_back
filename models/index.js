@@ -1,5 +1,5 @@
 'use strict';
-const { Client } = require('pg');
+import { Client } from 'pg';
 
 const fs = require('fs');
 const path = require('path');
