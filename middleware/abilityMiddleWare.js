@@ -1,5 +1,4 @@
-// const { defineAbilitiesFor } = require("../abilities/defineAbilities");
-import { defineAbilitiesFor } from '../abilities/defineAbilities';
+const { defineAbilitiesFor } = require("../abilities/defineAbilities");
 
 const checkPermissions = (action, subject) => {
   return async (req, res, next) => {

@@ -1,5 +1,4 @@
 'use strict';
-import { Client } from 'pg';
 
 const fs = require('fs');
 const path = require('path');
@@ -14,20 +13,22 @@ const db = {};
 const env = process.env.NODE_ENV || 'development';
 let sequelize;
 
-const client = new Client({
-  hostname: Deno.env.get("DATABASE_HOST") || "127.0.0.1",
-  user: Deno.env.get("DATABASE_USERNAME") || "postgres",
-  password: Deno.env.get("DATABASE_PASSWORD"),
-  database: Deno.env.get("DATABASE_NAME"),
-  port: Number(Deno.env.get("DATABASE_PORT")) || 5432,
-});
-
-try {
-  await client.connect();
-  console.log("Connected to the database!");
-}
-catch (e) {
-  console.log(e);
+if (process.env.USE_DATABASE_URL) {
+  // If you're using a single connection string (e.g., DATABASE_URL)
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: process.env.DATABASE_DIALECT || 'postgres',
+  });
+} else {
+  // Using individual parameters
+  sequelize = new Sequelize(
+    process.env.DATABASE_NAME,
+    process.env.DATABASE_USERNAME,
+    process.env.DATABASE_PASSWORD,
+    {
+      host: process.env.DATABASE_HOST,
+      dialect: process.env.DATABASE_DIALECT || 'postgres',
+    }
+  );
 }
 
 fs.readdirSync(__dirname)

@@ -1,5 +1,4 @@
-// const { Menu, Topping } = require("../models");
-import { Menu, Topping } from '../models';
+const { Menu, Topping } = require("../models");
 
 const registerMenu = async (newMenu, transaction) => {
     const { name, price, image, restaurantId } = newMenu;

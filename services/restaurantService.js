@@ -1,5 +1,4 @@
-// const { Restaurant } = require('../models');
-import { Restaurant } from '../models';
+const { Restaurant } = require('../models');
 
 const createRestaurant = async (restaurantData, transaction) => {
     const { name, location, logo } = restaurantData;

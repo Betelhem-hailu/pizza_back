@@ -1,5 +1,4 @@
-// const jwt = require("jsonwebtoken");
-import jwt from 'jsonwebtoken';
+const jwt = require("jsonwebtoken");
 
 const authenticate = (req, res, next) => {
   let token;

@@ -1,7 +1,5 @@
-// const { AbilityBuilder, Ability } = require('@casl/ability');
-// const db = require('../models');
-import { AbilityBuilder, Ability } from '@casl/ability';
-import db from '../models';
+const { AbilityBuilder, Ability } = require('@casl/ability');
+const db = require('../models');
 
 async function defineAbilitiesFor(userParam) {
   const { can, build } = new AbilityBuilder(Ability);

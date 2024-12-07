@@ -1,13 +1,8 @@
-// const { sequelize } = require("../models");
-// const db = require("../models");
-// const { Op } = require("sequelize");
-// const { uploadImage } = require("../services/imageUploadService");
-// const { registerMenu, createTopping } = require("../services/menuService");
-import { sequelize } from "../models/index.js";
-import db from "../models/index.js";
-import { Op } from "sequelize";
-import { uploadImage } from "../services/imageUploadService.js";
-import { registerMenu, createTopping } from "../services/menuService.js";
+const { sequelize } = require("../models");
+const db = require("../models");
+const { Op } = require("sequelize");
+const { uploadImage } = require("../services/imageUploadService");
+const { registerMenu, createTopping } = require("../services/menuService");
 
 const createMenu = async (req, res) => {
   const { name, price } = req.body;

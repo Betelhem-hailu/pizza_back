@@ -1,5 +1,4 @@
-// const bcrypt = require("bcryptjs");
-import bcrypt from 'bcryptjs';
+const bcrypt = require("bcryptjs");
 
 async function hashPassword(password) {
   const salt = await bcrypt.genSalt(10);
