@@ -7,6 +7,7 @@ const checkPermissions = (action, subject) => {
       if (ability.can(action, subject)) {
         return next();
       } else {
+        console.log('denied')
         return res.status(403).json({ error: 'Access Denied' });
       }
     } catch (error) {

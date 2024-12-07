@@ -4,24 +4,38 @@ const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
 const process = require('process');
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 const db = {};
 
+const env = process.env.NODE_ENV || 'development';
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+
+if (process.env.USE_DATABASE_URL) {
+  // If you're using a single connection string (e.g., DATABASE_URL)
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: process.env.DATABASE_DIALECT || 'postgres',
+  });
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  // Using individual parameters
+  sequelize = new Sequelize(
+    process.env.DATABASE_NAME,
+    process.env.DATABASE_USERNAME,
+    process.env.DATABASE_PASSWORD,
+    {
+      host: process.env.DATABASE_HOST,
+      dialect: process.env.DATABASE_DIALECT || 'postgres',
+    }
+  );
 }
 
-fs
-  .readdirSync(__dirname)
+fs.readdirSync(__dirname)
   .filter(file => {
     return (
       file.indexOf('.') !== 0 &&
-      file !== basename &&
+      file !== path.basename(__filename) &&
       file.slice(-3) === '.js' &&
       file.indexOf('.test.js') === -1
     );

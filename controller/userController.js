@@ -179,6 +179,7 @@ const login = async (req, res) => {
   try {
     let user;
     let roles = [];
+    let permissions = [];
 
     const adminEmailPattern = /.+\.admin@gmail\.com$/;
 
@@ -196,6 +197,15 @@ const login = async (req, res) => {
     });
 
     if (user && user.Roles) {
+      roles = user.Roles.map(role => role.name); // Get role names
+
+      // Get all permissions associated with the user's roles
+      user.Roles.forEach(role => {
+        permissions.push(...role.Permissions.map(permission => permission.name));
+      });
+    }
+
+    if (user && user.Roles) {
       roles = user.Roles.map(role => role.name);
     }
 
@@ -208,7 +218,7 @@ const login = async (req, res) => {
 
 
     const token = jwt.sign(
-      { userId: user.id, roles, restaurantId: user.restaurantId },
+      { userId: user.id, roles, permissions, restaurantId: user.restaurantId },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -217,6 +227,7 @@ const login = async (req, res) => {
       secure: false,
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/"
     });
 
     data = {
@@ -224,6 +235,8 @@ const login = async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       location: user.location,
+      roles,
+      permissions
     }
 
     res.status(200).json({ message: "Logged in successfully", data });
@@ -310,6 +323,16 @@ const getUsers = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  res.clearCookie("jwt",  {
+    httpOnly: true,      
+    secure: false,    
+    sameSite: 'Lax',
+    path: '/'          
+});
+  res.status(200).json({ message: "Logged out successfully" });
+};
+
 module.exports = {
   registerSuperAdminWithRestaurant,
   registerAdmin,
@@ -318,5 +341,6 @@ module.exports = {
   login,
   getRoles,
   getPermissions,
-  getUsers
+  getUsers,
+  logout
 };

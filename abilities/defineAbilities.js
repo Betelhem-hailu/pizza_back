@@ -2,7 +2,7 @@ const { AbilityBuilder, Ability } = require('@casl/ability');
 const db = require('../models');
 
 async function defineAbilitiesFor(userParam) {
-  const { can, cannot, build } = new AbilityBuilder(Ability);
+  const { can, build } = new AbilityBuilder(Ability);
 
   const user = await db.User.findOne({
     where: { id: userParam.userId },
@@ -21,12 +21,16 @@ async function defineAbilitiesFor(userParam) {
   } else {
     roles.forEach(role => {
       role.Permissions.forEach(permission => {
+        console.log(permission.name);
         switch (permission.name) {
           case 'update Order Status':
             can('update', 'Order');
             break;
           case 'see Orders':
             can('read', 'Order');
+            break;
+          case 'create Menu':
+            can('create', 'Menu');
             break;
           case 'add Users':
             can('create', 'User');

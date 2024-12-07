@@ -181,7 +181,6 @@ const getOrdersByRestaurantId = async (req, res) => {
     };
   }
 
-  console.log(whereClause);
   try {
     const orders = await db.Order.findAll({
       where: whereClause,

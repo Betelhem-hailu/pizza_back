@@ -7,5 +7,5 @@ const checkPermissions = require('../middleware/abilityMiddleWare');
 router.post('/placeorder', authenticate, createOrder);
 router.get('/orderhistory', authenticate, getOrderHistory);
 router.put('/updateorderstatus', authenticate, checkPermissions('update', 'Order'), updateOrderStatus);
-router.get("/orders", authenticate, getOrdersByRestaurantId);
+router.get("/orders", authenticate, checkPermissions('read', 'Order'), getOrdersByRestaurantId);
 module.exports = router;

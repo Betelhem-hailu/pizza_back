@@ -88,16 +88,30 @@ const getMenuById = async (req, res) => {
 };
 
 const getAllMenus = async (req, res) => {
-  const { menuName, toppingName, restaurantName } = req.query;
+  const { search } = req.query;
 
   try {
-    const whereConditions = {
-      ...(menuName && {
-        name: {
-          [Op.iLike]: `%${menuName}%`,
-        },
-      }),
-    };
+    const whereConditions = search
+    ? {
+        [Op.or]: [
+          {
+            name: {
+              [Op.iLike]: `%${search}%`,
+            },
+          },
+          {
+            '$restaurant.name$': {
+              [Op.iLike]: `%${search}%`,
+            },
+          },
+          {
+            '$Toppings.name$': {
+              [Op.iLike]: `%${search}%`,
+            },
+          },
+        ],
+      }
+    : {}; 
 
     const menus = await db.Menu.findAll({
       where: whereConditions,
@@ -106,30 +120,46 @@ const getAllMenus = async (req, res) => {
           model: db.Restaurant,
           attributes: ["name", "logo"],
           as: "restaurant",
-          ...(restaurantName && {
-            where: {
-              name: {
-                [Op.iLike]: `%${restaurantName}%`,
-              },
-            },
-          }),
         },
         {
           model: db.Topping,
           attributes: ["name"],
-          ...(toppingName && {
-            where: {
-              name: {
-                [Op.iLike]: `%${toppingName}%`,
-              },
-            },
-          }),
         },
       ],
       distinct: true,
     });
 
-    return res.status(200).json(menus);
+    
+    const structuredResults = menus.reduce((acc, item) => {
+      const existingMenu = acc.find(menu => menu.id === item.id);
+
+      if (!existingMenu) {
+        acc.push({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          restaurant: {
+            id: item.restaurant?.id,
+            name: item.restaurant?.name,
+            logo: item.restaurant?.logo,
+          },
+          toppings: item.Toppings.map(topping => topping.name),
+        });
+      }
+
+      return acc;
+    }, []);
+
+    
+    if (!menus || menus.length === 0) {
+      return res.status(404).json({ message: 'No Menus found matching the search criteria.' });
+    }
+    
+    return res.status(200).json(structuredResults);
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
